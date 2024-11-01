@@ -1,0 +1,12 @@
+{
+    "name": "com.yourindiedev.character-controller",
+    "version": "1.0.0",
+    "displayName": "Character Controller",
+    "description": "An implementation of a character controller to help start you off.",
+    "unity": "2023.2",
+    "author": {
+      "name": "Your Indie Dev",
+      "url": "https://github.com/YourIndieDev"
+    },
+    "dependencies": {}
+  }
