@@ -11,6 +11,7 @@ namespace Indie
         [SerializeField] private float crouchMultiplier = 0.5f;
         [SerializeField] private float jumpForce = 5f;
         [SerializeField] private float airControl = 0.3f;
+        [SerializeField] private bool useRotationalMovement = true; // Toggle for movement style
 
         [Header("Ground Check Settings")]
         [SerializeField] private LayerMask groundMask;
@@ -69,9 +70,21 @@ namespace Indie
             float horizontal = Input.GetAxisRaw("Horizontal");
             float vertical = Input.GetAxisRaw("Vertical");
 
-            // Calculate move direction relative to camera
-            moveDirection = new Vector3(horizontal, 0, vertical).normalized;
-            moveDirection = transform.TransformDirection(moveDirection);
+            if (useRotationalMovement)
+            {
+                // Original rotation-based movement
+                moveDirection = new Vector3(0, 0, vertical).normalized;
+                moveDirection = transform.TransformDirection(moveDirection);
+
+                // Manual rotation based on horizontal input
+                transform.Rotate(Vector3.up * horizontal * rotationSpeed);
+            }
+            else
+            {
+                // Strafe-based movement
+                moveDirection = new Vector3(horizontal, 0, vertical).normalized;
+                moveDirection = transform.TransformDirection(moveDirection);
+            }
 
             // Handle jumping
             if (Input.GetButtonDown("Jump") && isGrounded)
@@ -87,6 +100,12 @@ namespace Indie
 
             // Handle sprinting
             isSprinting = Input.GetKey(KeyCode.LeftShift);
+
+            // Toggle movement style (for testing)
+            if (Input.GetKeyDown(KeyCode.T))
+            {
+                ToggleMovementStyle();
+            }
         }
 
         private void HandleRotation()
@@ -100,10 +119,14 @@ namespace Indie
             verticalRotation = Mathf.Clamp(verticalRotation, -maxLookAngle, maxLookAngle);
             playerCamera.localRotation = Quaternion.Euler(verticalRotation, 0f, 0f);
 
-            // Horizontal rotation (turning left/right)
-            transform.Rotate(Vector3.up * mouseX);
+            // Horizontal rotation (turning left/right) - only if not using rotational movement
+            if (!useRotationalMovement)
+            {
+                transform.Rotate(Vector3.up * mouseX);
+            }
         }
 
+        // The rest of the methods remain unchanged
         private void HandleMovement()
         {
             float currentSpeed = moveSpeed;
@@ -181,6 +204,12 @@ namespace Indie
             playerCamera.localPosition = newCameraPos;
         }
 
+        // New method to toggle movement style
+        public void ToggleMovementStyle()
+        {
+            useRotationalMovement = !useRotationalMovement;
+        }
+
         // Public methods for external control
         public void SetMovementEnabled(bool enabled)
         {
@@ -197,6 +226,11 @@ namespace Indie
             moveSpeed = speed;
         }
 
+        public float GetMoveSpeed()
+        {
+            return moveSpeed;
+        }
+
         public bool IsGrounded()
         {
             return isGrounded;
@@ -210,6 +244,11 @@ namespace Indie
         public bool IsSprinting()
         {
             return isSprinting;
+        }
+
+        public bool IsUsingRotationalMovement()
+        {
+            return useRotationalMovement;
         }
 
         private void OnDrawGizmosSelected()
